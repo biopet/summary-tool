@@ -1,5 +1,6 @@
 package nl.biopet.summary.tool
 
+import java.lang.IllegalStateException
 import java.sql.Date
 
 import nl.biopet.summary.{SummaryDb, SummaryDbWrite}
@@ -9,7 +10,7 @@ import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 
-object Main extends ToolCommand {
+object SummaryMain extends ToolCommand {
   def main(args: Array[String]): Unit = {
     val parser = new ArgsParser
     val cmdArgs = parser.parse(args, Args()).getOrElse(throw new IllegalArgumentException)
@@ -28,14 +29,17 @@ object Main extends ToolCommand {
     case "addProject" => addProject(db, cmdArgs.projectName.get)
     case _ if cmdArgs.runName.isEmpty =>
       throw new IllegalArgumentException("Run Name should be given")
-    case "addRun" => addRun(db, cmdArgs.pipelineName.get, cmdArgs.runName.get, cmdArgs.outputDir, cmdArgs.version, cmdArgs.commitHash)
+    case "addRun" => addRun(db, cmdArgs.projectName.get, cmdArgs.runName.get, cmdArgs.outputDir, cmdArgs.version, cmdArgs.commitHash)
     case m => throw new UnsupportedOperationException(s"Method '$m' does not exist")
   }
 
   }
 
   def addProject(db: SummaryDbWrite, projectName: String): Unit = {
-    Await.result(db.createProject(projectName), Duration.Inf)
+    Await.result(db.getProjects(name = Some(projectName)).flatMap { _.headOption match {
+      case Some(project) => throw new IllegalStateException(s"Project name '$projectName' does already exist")
+      case _ => db.createProject(projectName)
+    }}, Duration.Inf)
   }
 
   def addRun(db: SummaryDbWrite,
@@ -47,7 +51,14 @@ object Main extends ToolCommand {
     require(outputDir.nonEmpty, "outputDir is missing")
     require(version.nonEmpty, "version is missing")
     require(commitHash.nonEmpty, "commitHash is missing")
-    val projectId = Await.result(db.createProject(projectName), Duration.Inf)
-    Await.result(db.createRun(runName, projectId, outputDir.get, version.get, commitHash.get, new Date(System.currentTimeMillis())), Duration.Inf)
+    Await.result(db.getProjects(name = Some(projectName)).flatMap { _.headOption match {
+      case Some(project) =>
+        db.getRuns(protectId = Some(project.id), runName = Some(runName)).flatMap { _.headOption match {
+          case Some(run) => throw new IllegalStateException(s"Run '$runName' already exist")
+          case _ =>
+            db.createRun(runName, project.id, outputDir.get, version.get, commitHash.get, new Date(System.currentTimeMillis()))
+        }}
+      case _ => throw new IllegalStateException(s"Project '$projectName' does not exist")
+    }}, Duration.Inf)
   }
 }

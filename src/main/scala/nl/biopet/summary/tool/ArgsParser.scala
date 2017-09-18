@@ -15,4 +15,7 @@ class ArgsParser extends AbstractOptParser[Args]("summary") {
   opt[String]("library").abbr("lib").unbounded().maxOccurs(1).action((x, c) => c.copy(libraryName = Some(x)))
   opt[String]("readgroup").abbr("rg").unbounded().maxOccurs(1).action((x, c) => c.copy(readgroupName = Some(x)))
   opt[String]("method").required().unbounded().maxOccurs(1).action((x, c) => c.copy(method = x))
+  opt[String]("outputDir").unbounded().maxOccurs(1).action((x, c) => c.copy(outputDir = Some(x)))
+  opt[String]("runVersion").unbounded().maxOccurs(1).action((x, c) => c.copy(version = Some(x)))
+  opt[String]("commitHash").unbounded().maxOccurs(1).action((x, c) => c.copy(commitHash = Some(x)))
 }
