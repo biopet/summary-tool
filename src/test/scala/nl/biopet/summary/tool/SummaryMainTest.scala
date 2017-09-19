@@ -31,7 +31,7 @@ class SummaryMainTest extends TestNGSuite with Matchers {
 
     intercept[IllegalArgumentException] {
       SummaryMain.main(Array("--jdbcUrl", s"jdbc:h2:${dbFile.getAbsolutePath}", "-h2", dbFile.getAbsolutePath, "--method", "addProject", "-p", "test"))
-    }.getMessage shouldBe "h2 file and jcdbUrl are given"
+    }.getMessage shouldBe "h2 file and jdbcUrl are given"
   }
 
   @Test

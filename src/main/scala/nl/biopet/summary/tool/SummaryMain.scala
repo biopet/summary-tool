@@ -15,7 +15,7 @@ object SummaryMain extends ToolCommand {
     val cmdArgs = parser.parse(args, Args()).getOrElse(throw new IllegalArgumentException)
 
     val db = (cmdArgs.h2File, cmdArgs.jdbc) match {
-      case (Some(_), Some(_)) => throw new IllegalArgumentException("h2 file and jcdbUrl are given")
+      case (Some(_), Some(_)) => throw new IllegalArgumentException("h2 file and jdbcUrl are given")
       case (Some(h2), _) => SummaryDb.openH2Summary(h2)
       case (_, Some(url)) => SummaryDb.openSummary(url)
       case _ => throw new IllegalArgumentException("h2 file or jdbcUrl not given")
