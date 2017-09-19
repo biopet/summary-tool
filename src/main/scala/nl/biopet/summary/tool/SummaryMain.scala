@@ -36,7 +36,7 @@ object SummaryMain extends ToolCommand {
 
   def addProject(db: SummaryDbWrite, projectName: String): Unit = {
     Await.result(db.getProjects(name = Some(projectName)).flatMap { _.headOption match {
-      case Some(project) => throw new IllegalStateException(s"Project name '$projectName' does already exist")
+      case Some(_) => throw new IllegalStateException(s"Project name '$projectName' does already exist")
       case _ => db.createProject(projectName)
     }}, Duration.Inf)
   }
