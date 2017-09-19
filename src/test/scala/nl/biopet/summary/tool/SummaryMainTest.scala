@@ -177,6 +177,10 @@ class SummaryMainTest extends TestNGSuite with Matchers {
 
     val runId = Await.result(db.createRun("test", projectId, "test", "test", "test", new Date(System.currentTimeMillis())), Duration.Inf)
 
+    intercept[IllegalArgumentException] {
+      SummaryMain.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "-r", "test", "--method", "addSamples"))
+    }.getMessage shouldBe "requirement failed: sample config file required"
+
     SummaryMain.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "-r", "test", "--method", "addSamples", "--samplesConfigFile", configFile.getAbsolutePath))
 
     val samples = Await.result(db.getSamples(), Duration.Inf)
