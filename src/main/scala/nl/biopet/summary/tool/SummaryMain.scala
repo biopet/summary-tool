@@ -48,6 +48,19 @@ object SummaryMain extends ToolCommand {
                    cmdArgs.projectName.get,
                    cmdArgs.runName.get,
                    cmdArgs.samplesConfigFile.get)
+      case "addRunAndSamples" =>
+        require(cmdArgs.samplesConfigFile.isDefined,
+          "sample config file required")
+        addRun(db,
+          cmdArgs.projectName.get,
+          cmdArgs.runName.get,
+          cmdArgs.outputDir,
+          cmdArgs.version,
+          cmdArgs.commitHash)
+        addSamples(db,
+          cmdArgs.projectName.get,
+          cmdArgs.runName.get,
+          cmdArgs.samplesConfigFile.get)
       case m =>
         throw new UnsupportedOperationException(s"Method '$m' does not exist")
     }

@@ -206,6 +206,29 @@ class SummaryMainTest extends TestNGSuite with Matchers {
     readgroups.size shouldBe 1
     readgroups.map(c => (c.name, c.libraryId)).sorted shouldBe Seq(("rg1", lib1Id)).sorted
     Json.parse(readgroups.head.tags.get) shouldBe Json.obj("key" -> "value")
+  }
 
+  @Test
+  def testRunAndSamples(): Unit = {
+    val configFile = File.createTempFile("config.", ".yaml")
+    configFile.deleteOnExit()
+    val writer = new PrintWriter(configFile)
+    writer.println(yamlSamples)
+    writer.close()
+
+    val dbFile = File.createTempFile("summary.", ".db")
+    dbFile.deleteOnExit()
+    val db = SummaryDb.openH2Summary(dbFile)
+    db.createTables()
+
+    val projectId = Await.result(db.createProject("test"), Duration.Inf)
+
+    SummaryMain.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "-r", "test", "--method", "addRunAndSamples", "--samplesConfigFile", configFile.getAbsolutePath, "--outputDir", "dir", "--runVersion", "version", "--commitHash", "hash"))
+    val samples = Await.result(db.getSamples(), Duration.Inf)
+    samples.size shouldBe 2
+    val libraries = Await.result(db.getLibraries(), Duration.Inf)
+    libraries.size shouldBe 2
+    val readgroups = Await.result(db.getReadgroups(), Duration.Inf)
+    readgroups.size shouldBe 1
   }
 }
