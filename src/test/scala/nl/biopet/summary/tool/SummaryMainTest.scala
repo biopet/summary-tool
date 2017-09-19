@@ -25,6 +25,16 @@ class SummaryMainTest extends TestNGSuite with Matchers {
   }
 
   @Test
+  def testBothInput(): Unit = {
+    val dbFile = File.createTempFile("summary.", ".db")
+    dbFile.deleteOnExit()
+
+    intercept[IllegalArgumentException] {
+      SummaryMain.main(Array("--jdbcUrl", s"jdbc:h2:${dbFile.getAbsolutePath}", "-h2", dbFile.getAbsolutePath, "--method", "addProject", "-p", "test"))
+    }.getMessage shouldBe "h2 file and jcdbUrl are given"
+  }
+
+  @Test
   def testFileInit(): Unit = {
     val dbFile = File.createTempFile("summary.", ".db")
     dbFile.deleteOnExit()
