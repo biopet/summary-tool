@@ -191,7 +191,7 @@ class SummaryMainTest extends TestNGSuite with Matchers {
 
     val readgroups = Await.result(db.getReadgroups(), Duration.Inf)
     readgroups.size shouldBe 1
-    readgroups.map(c => (c.name, c.libraryId)).sorted shouldBe Seq(("rg1", sample1Id)).sorted
+    readgroups.map(c => (c.name, c.libraryId)).sorted shouldBe Seq(("rg1", lib1Id)).sorted
 
   }
 }
