@@ -13,6 +13,49 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class SummaryMainTest extends TestNGSuite with Matchers {
+
+  @Test
+  def testUnknownMethod(): Unit = {
+    val dbFile = File.createTempFile("summary.", ".db")
+    dbFile.deleteOnExit()
+
+    intercept[UnsupportedOperationException] {
+      SummaryMain.main(Array("-h2", dbFile.getAbsolutePath, "--method", "I_do_not_exist", "-p", "test", "-r", "name"))
+    }.getMessage shouldBe "Method 'I_do_not_exist' does not exist"
+  }
+
+  @Test
+  def testFileInit(): Unit = {
+    val dbFile = File.createTempFile("summary.", ".db")
+    dbFile.deleteOnExit()
+    intercept[IllegalArgumentException] {
+      SummaryMain.main(Array("-h2", dbFile.getAbsolutePath))
+    }
+    intercept[IllegalArgumentException] {
+      SummaryMain.main(Array("--method", "initDb"))
+    }.getMessage shouldBe "h2 file or jdbcUrl not given"
+    SummaryMain.main(Array("-h2", dbFile.getAbsolutePath, "--method", "initDb"))
+
+    val db = SummaryDb.openReadOnlyH2Summary(dbFile)
+    require(db.tablesExist(), "Tables are missing from database")
+  }
+
+  @Test
+  def testUrlInit(): Unit = {
+    val dbFile = File.createTempFile("summary.", ".db")
+    dbFile.deleteOnExit()
+    intercept[IllegalArgumentException] {
+      SummaryMain.main(Array("--jdbcUrl", s"jdbc:h2:${dbFile.getAbsolutePath}"))
+    }
+    intercept[IllegalArgumentException] {
+      SummaryMain.main(Array("--method", "initDb"))
+    }.getMessage shouldBe "h2 file or jdbcUrl not given"
+    SummaryMain.main(Array("--jdbcUrl", s"jdbc:h2:${dbFile.getAbsolutePath}", "--method", "initDb"))
+
+    val db = SummaryDb.openReadOnlyH2Summary(dbFile)
+    require(db.tablesExist(), "Tables are missing from database")
+  }
+
   @Test
   def testAddProject(): Unit = {
     val dbFile = File.createTempFile("summary.", ".db")

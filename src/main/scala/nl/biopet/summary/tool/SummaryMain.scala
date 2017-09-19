@@ -1,6 +1,5 @@
 package nl.biopet.summary.tool
 
-import java.lang.IllegalStateException
 import java.sql.Date
 
 import nl.biopet.summary.{SummaryDb, SummaryDbWrite}
@@ -19,7 +18,7 @@ object SummaryMain extends ToolCommand {
       case (Some(_), Some(_)) => throw new IllegalArgumentException("h2 file and jcdbUrl are given")
       case (Some(h2), _) => SummaryDb.openH2Summary(h2)
       case (_, Some(url)) => SummaryDb.openSummary(url)
-      case _ => throw new IllegalArgumentException("h2 file or jcdbUrl not given")
+      case _ => throw new IllegalArgumentException("h2 file or jdbcUrl not given")
     }
 
   cmdArgs.method match {
