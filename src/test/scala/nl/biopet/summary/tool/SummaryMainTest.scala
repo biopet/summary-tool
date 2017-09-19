@@ -181,17 +181,17 @@ class SummaryMainTest extends TestNGSuite with Matchers {
 
     val samples = Await.result(db.getSamples(), Duration.Inf)
     samples.size shouldBe 2
-    samples.map(_.name) shouldBe Seq("sample1", "sample2")
+    samples.map(_.name).sorted shouldBe Seq("sample1", "sample2").sorted
     val sample1Id = Await.result(db.getSampleId(runId, "sample1"), Duration.Inf).get
 
     val libraries = Await.result(db.getLibraries(), Duration.Inf)
     libraries.size shouldBe 2
-    libraries.map(c => (c.name, c.sampleId)) shouldBe Seq(("lib1", sample1Id), ("lib2", sample1Id))
+    libraries.map(c => (c.name, c.sampleId)).sorted shouldBe Seq(("lib1", sample1Id), ("lib2", sample1Id)).sorted
     val lib1Id = Await.result(db.getLibraryId(sample1Id, "lib1"), Duration.Inf)
 
     val readgroups = Await.result(db.getReadgroups(), Duration.Inf)
     readgroups.size shouldBe 1
-    readgroups.map(c => (c.name, c.libraryId)) shouldBe Seq(("rg1", sample1Id))
+    readgroups.map(c => (c.name, c.libraryId)).sorted shouldBe Seq(("rg1", sample1Id)).sorted
 
   }
 }
