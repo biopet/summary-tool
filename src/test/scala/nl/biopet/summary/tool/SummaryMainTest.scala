@@ -1,6 +1,7 @@
 package nl.biopet.summary.tool
 
-import java.io.File
+import java.io.{File, PrintWriter}
+import java.sql.Date
 
 import nl.biopet.summary.SummaryDb
 import org.scalatest.Matchers
@@ -9,7 +10,6 @@ import org.testng.annotations.Test
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
-
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class SummaryMainTest extends TestNGSuite with Matchers {
@@ -133,5 +133,51 @@ class SummaryMainTest extends TestNGSuite with Matchers {
     runs.head.commitHash shouldBe "hash"
     runs.head.version shouldBe "version"
     runs.head.projectId shouldBe pipelineId
+  }
+
+  val yamlSamples: String =
+    """
+      |samples:
+      |  sample1:
+      |    R1: test1
+      |    libraries:
+      |      lib1:
+      |        R1: test2
+      |        readgroups:
+      |          rg1:
+      |            R1: test3
+      |      lib2:
+      |        R1: test5
+      |  sample2:
+      |    R1: test4
+      |""".stripMargin
+
+  @Test
+  def testSamples(): Unit = {
+    val configFile = File.createTempFile("config.", ".yaml")
+    configFile.deleteOnExit()
+    val writer = new PrintWriter(configFile)
+    writer.println(yamlSamples)
+    writer.close()
+
+    val dbFile = File.createTempFile("summary.", ".db")
+    dbFile.deleteOnExit()
+    val db = SummaryDb.openH2Summary(dbFile)
+    db.createTables()
+
+    intercept[IllegalStateException] {
+      SummaryMain.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "-r", "test", "--method", "addSamples", "--samplesConfigFile", configFile.getAbsolutePath))
+    }.getMessage shouldBe "Project 'test' does not exist"
+
+    val projectId = Await.result(db.createProject("test"), Duration.Inf)
+
+    intercept[IllegalStateException] {
+      SummaryMain.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "-r", "test", "--method", "addSamples", "--samplesConfigFile", configFile.getAbsolutePath))
+    }.getMessage shouldBe "Run 'test' does not exist"
+
+    Await.result(db.createRun("test", projectId, "test", "test", "test", new Date(System.currentTimeMillis())), Duration.Inf)
+
+    SummaryMain.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "-r", "test", "--method", "addSamples", "--samplesConfigFile", configFile.getAbsolutePath))
+
   }
 }

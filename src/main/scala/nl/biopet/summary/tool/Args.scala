@@ -9,4 +9,5 @@ case class Args(h2File: Option[File] = None,
                 method: String = null,
                 outputDir: Option[String] = None,
                 version: Option[String] = None,
-                commitHash: Option[String] = None)
+                commitHash: Option[String] = None,
+                samplesConfigFile: Option[File] = None)

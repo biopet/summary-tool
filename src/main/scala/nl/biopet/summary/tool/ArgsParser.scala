@@ -42,4 +42,8 @@ class ArgsParser extends AbstractOptParser[Args]("summary") {
     .unbounded()
     .maxOccurs(1)
     .action((x, c) => c.copy(commitHash = Some(x)))
+  opt[File]("samplesConfigFile")
+    .unbounded()
+    .maxOccurs(1)
+    .action((x, c) => c.copy(samplesConfigFile = Some(x)))
 }
