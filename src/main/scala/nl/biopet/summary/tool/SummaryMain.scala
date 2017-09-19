@@ -142,16 +142,25 @@ object SummaryMain extends ToolCommand {
           val createLibrary = createSample.flatMap(
             sampleId =>
               db.createOrUpdateLibrary(library,
-                                       runId,
                                        sampleId,
                                        (libraryConfig \ "tags")
                                          .validate[JsObject]
                                          .asOpt
                                          .map(_.toString())))
-          // TODO: Readgroups
-          createLibrary
+          val readgroupFutures = for ((readgroup, readgroupConfig) <- config
+                                        .readgroups(sample, library)) yield {
+            createLibrary.flatMap(
+              libraryId =>
+                db.createReadgroup(readgroup,
+                                   libraryId,
+                                   (readgroupConfig \ "tags")
+                                     .validate[JsObject]
+                                     .asOpt
+                                     .map(_.toString())))
+          }
+          createLibrary :: readgroupFutures.toList
         }
-      createSample :: libraries.toList
+      createSample :: libraries.toList.flatten
     }).flatten
     Await.result(Future.sequence(futures), Duration.Inf)
   }
