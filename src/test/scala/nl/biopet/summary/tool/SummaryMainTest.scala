@@ -71,15 +71,12 @@ class SummaryMainTest extends TestNGSuite with Matchers {
   def testAddProject(): Unit = {
     val dbFile = File.createTempFile("summary.", ".db")
     dbFile.deleteOnExit()
-    val db = SummaryDb.openH2Summary(dbFile)
-    db.createTables()
-
-    Await.result(db.getProjects(), Duration.Inf).size shouldBe 0
-
     intercept[IllegalArgumentException] {
       SummaryMain.main(Array("-h2", dbFile.getAbsolutePath, "--method", "addProject"))
     }.getMessage shouldBe "Project Name should be given"
     SummaryMain.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "--method", "addProject"))
+
+    val db = SummaryDb.openReadOnlyH2Summary(dbFile)
 
     val projects = Await.result(db.getProjects(), Duration.Inf)
 
