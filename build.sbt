@@ -1,8 +1,6 @@
 organization := "com.github.biopet"
 name := "biopet-summary-tool"
 
-version := "0.1.0-SNAPSHOT"
-
 scalaVersion := "2.11.11"
 
 resolvers += Resolver.mavenLocal
