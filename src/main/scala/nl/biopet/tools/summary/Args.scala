@@ -1,4 +1,4 @@
-package nl.biopet.summary.tool
+package nl.biopet.tools.summary
 
 import java.io.File
 

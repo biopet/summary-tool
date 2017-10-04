@@ -13,7 +13,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SummaryMainTest extends TestNGSuite with Matchers {
+class MainTest extends TestNGSuite with Matchers {
 
   @Test
   def testUnknownMethod(): Unit = {

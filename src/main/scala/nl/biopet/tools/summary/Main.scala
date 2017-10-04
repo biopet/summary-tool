@@ -1,4 +1,4 @@
-package nl.biopet.summary.tool
+package nl.biopet.tools.summary
 
 import java.io.File
 import java.sql.Date
@@ -12,9 +12,9 @@ import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 
-object SummaryMain extends ToolCommand {
+object Main extends ToolCommand {
   def main(args: Array[String]): Unit = {
-    val parser = new ArgsParser
+    val parser = new ArgsParser(this.getClass.getPackage.getName.split(".").last)
     val cmdArgs =
       parser.parse(args, Args()).getOrElse(throw new IllegalArgumentException)
 

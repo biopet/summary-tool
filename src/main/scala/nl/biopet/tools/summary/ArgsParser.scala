@@ -1,10 +1,10 @@
-package nl.biopet.summary.tool
+package nl.biopet.tools.summary
 
 import java.io.File
 
 import nl.biopet.utils.tool.AbstractOptParser
 
-class ArgsParser extends AbstractOptParser[Args]("summary") {
+class ArgsParser(cmdName: String) extends AbstractOptParser[Args](cmdName) {
   opt[File]("h2File")
     .abbr("h2")
     .unbounded()
