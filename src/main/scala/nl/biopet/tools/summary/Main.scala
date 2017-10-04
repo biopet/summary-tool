@@ -14,7 +14,8 @@ import scala.concurrent.duration.Duration
 
 object Main extends ToolCommand {
   def main(args: Array[String]): Unit = {
-    val parser = new ArgsParser(this.getClass.getPackage.getName.split(".").last)
+    val parser = new ArgsParser(
+      this.getClass.getPackage.getName.split(".").last)
     val cmdArgs =
       parser.parse(args, Args()).getOrElse(throw new IllegalArgumentException)
 
@@ -50,17 +51,17 @@ object Main extends ToolCommand {
                    cmdArgs.samplesConfigFile.get)
       case "addRunAndSamples" =>
         require(cmdArgs.samplesConfigFile.isDefined,
-          "sample config file required")
+                "sample config file required")
         addRun(db,
-          cmdArgs.projectName.get,
-          cmdArgs.runName.get,
-          cmdArgs.outputDir,
-          cmdArgs.version,
-          cmdArgs.commitHash)
+               cmdArgs.projectName.get,
+               cmdArgs.runName.get,
+               cmdArgs.outputDir,
+               cmdArgs.version,
+               cmdArgs.commitHash)
         addSamples(db,
-          cmdArgs.projectName.get,
-          cmdArgs.runName.get,
-          cmdArgs.samplesConfigFile.get)
+                   cmdArgs.projectName.get,
+                   cmdArgs.runName.get,
+                   cmdArgs.samplesConfigFile.get)
       case m =>
         throw new UnsupportedOperationException(s"Method '$m' does not exist")
     }
