@@ -1,4 +1,4 @@
-package nl.biopet.summary.tool
+package nl.biopet.tools.summary
 
 import java.io.{File, PrintWriter}
 import java.sql.Date
@@ -13,7 +13,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class MainTest extends TestNGSuite with Matchers {
+class SummaryToolTest extends TestNGSuite with Matchers {
 
   @Test
   def testUnknownMethod(): Unit = {
@@ -21,7 +21,7 @@ class MainTest extends TestNGSuite with Matchers {
     dbFile.deleteOnExit()
 
     intercept[UnsupportedOperationException] {
-      SummaryMain.main(Array("-h2", dbFile.getAbsolutePath, "--method", "I_do_not_exist", "-p", "test", "-r", "name"))
+      SummaryTool.main(Array("-h2", dbFile.getAbsolutePath, "--method", "I_do_not_exist", "-p", "test", "-r", "name"))
     }.getMessage shouldBe "Method 'I_do_not_exist' does not exist"
   }
 
@@ -31,7 +31,7 @@ class MainTest extends TestNGSuite with Matchers {
     dbFile.deleteOnExit()
 
     intercept[IllegalArgumentException] {
-      SummaryMain.main(Array("--jdbcUrl", s"jdbc:h2:${dbFile.getAbsolutePath}", "-h2", dbFile.getAbsolutePath, "--method", "addProject", "-p", "test"))
+      SummaryTool.main(Array("--jdbcUrl", s"jdbc:h2:${dbFile.getAbsolutePath}", "-h2", dbFile.getAbsolutePath, "--method", "addProject", "-p", "test"))
     }.getMessage shouldBe "h2 file and jdbcUrl are given"
   }
 
@@ -40,12 +40,12 @@ class MainTest extends TestNGSuite with Matchers {
     val dbFile = File.createTempFile("summary.", ".db")
     dbFile.deleteOnExit()
     intercept[IllegalArgumentException] {
-      SummaryMain.main(Array("-h2", dbFile.getAbsolutePath))
+      SummaryTool.main(Array("-h2", dbFile.getAbsolutePath))
     }
     intercept[IllegalArgumentException] {
-      SummaryMain.main(Array("--method", "initDb"))
+      SummaryTool.main(Array("--method", "initDb"))
     }.getMessage shouldBe "h2 file or jdbcUrl not given"
-    SummaryMain.main(Array("-h2", dbFile.getAbsolutePath, "--method", "initDb"))
+    SummaryTool.main(Array("-h2", dbFile.getAbsolutePath, "--method", "initDb"))
 
     val db = SummaryDb.openReadOnlyH2Summary(dbFile)
     require(db.tablesExist(), "Tables are missing from database")
@@ -56,12 +56,12 @@ class MainTest extends TestNGSuite with Matchers {
     val dbFile = File.createTempFile("summary.", ".db")
     dbFile.deleteOnExit()
     intercept[IllegalArgumentException] {
-      SummaryMain.main(Array("--jdbcUrl", s"jdbc:h2:${dbFile.getAbsolutePath}"))
+      SummaryTool.main(Array("--jdbcUrl", s"jdbc:h2:${dbFile.getAbsolutePath}"))
     }
     intercept[IllegalArgumentException] {
-      SummaryMain.main(Array("--method", "initDb"))
+      SummaryTool.main(Array("--method", "initDb"))
     }.getMessage shouldBe "h2 file or jdbcUrl not given"
-    SummaryMain.main(Array("--jdbcUrl", s"jdbc:h2:${dbFile.getAbsolutePath}", "--method", "initDb"))
+    SummaryTool.main(Array("--jdbcUrl", s"jdbc:h2:${dbFile.getAbsolutePath}", "--method", "initDb"))
 
     val db = SummaryDb.openReadOnlyH2Summary(dbFile)
     require(db.tablesExist(), "Tables are missing from database")
@@ -72,9 +72,9 @@ class MainTest extends TestNGSuite with Matchers {
     val dbFile = File.createTempFile("summary.", ".db")
     dbFile.deleteOnExit()
     intercept[IllegalArgumentException] {
-      SummaryMain.main(Array("-h2", dbFile.getAbsolutePath, "--method", "addProject"))
+      SummaryTool.main(Array("-h2", dbFile.getAbsolutePath, "--method", "addProject"))
     }.getMessage shouldBe "Project Name should be given"
-    SummaryMain.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "--method", "addProject"))
+    SummaryTool.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "--method", "addProject"))
 
     val db = SummaryDb.openReadOnlyH2Summary(dbFile)
 
@@ -84,7 +84,7 @@ class MainTest extends TestNGSuite with Matchers {
     projects.head.name shouldBe "test"
 
     intercept[IllegalStateException] {
-      SummaryMain.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "--method", "addProject"))
+      SummaryTool.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "--method", "addProject"))
     }.getMessage shouldBe "Project name 'test' does already exist"
   }
 
@@ -98,30 +98,30 @@ class MainTest extends TestNGSuite with Matchers {
     Await.result(db.getRuns(), Duration.Inf).size shouldBe 0
 
     intercept[IllegalArgumentException] {
-      SummaryMain.main(Array("-h2", dbFile.getAbsolutePath, "--method", "addRun"))
+      SummaryTool.main(Array("-h2", dbFile.getAbsolutePath, "--method", "addRun"))
     }.getMessage shouldBe "Project Name should be given"
     intercept[IllegalArgumentException] {
-      SummaryMain.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "--method", "addRun"))
+      SummaryTool.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "--method", "addRun"))
     }.getMessage shouldBe "Run Name should be given"
     intercept[IllegalArgumentException] {
-      SummaryMain.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "-r", "test", "--method", "addRun"))
+      SummaryTool.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "-r", "test", "--method", "addRun"))
     }.getMessage shouldBe "requirement failed: outputDir is missing"
     intercept[IllegalArgumentException] {
-      SummaryMain.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "-r", "test", "--method", "addRun", "--outputDir", "test"))
+      SummaryTool.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "-r", "test", "--method", "addRun", "--outputDir", "test"))
     }.getMessage shouldBe "requirement failed: version is missing"
     intercept[IllegalArgumentException] {
-      SummaryMain.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "-r", "test", "--method", "addRun", "--outputDir", "test", "--runVersion", "test"))
+      SummaryTool.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "-r", "test", "--method", "addRun", "--outputDir", "test", "--runVersion", "test"))
     }.getMessage shouldBe "requirement failed: commitHash is missing"
     intercept[IllegalStateException] {
-      SummaryMain.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "-r", "test", "--method", "addRun", "--outputDir", "test", "--runVersion", "test", "--commitHash", "test"))
+      SummaryTool.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "-r", "test", "--method", "addRun", "--outputDir", "test", "--runVersion", "test", "--commitHash", "test"))
     }.getMessage shouldBe "Project 'test' does not exist"
 
     val pipelineId = Await.result(db.createProject("test"), Duration.Inf)
 
-    SummaryMain.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "-r", "name", "--method", "addRun", "--outputDir", "dir", "--runVersion", "version", "--commitHash", "hash"))
+    SummaryTool.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "-r", "name", "--method", "addRun", "--outputDir", "dir", "--runVersion", "version", "--commitHash", "hash"))
 
     intercept[IllegalStateException] {
-      SummaryMain.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "-r", "name", "--method", "addRun", "--outputDir", "dir", "--runVersion", "version", "--commitHash", "hash"))
+      SummaryTool.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "-r", "name", "--method", "addRun", "--outputDir", "dir", "--runVersion", "version", "--commitHash", "hash"))
     }.getMessage shouldBe "Run 'name' already exist"
 
     val runs = Await.result(db.getRuns(), Duration.Inf)
@@ -170,22 +170,22 @@ class MainTest extends TestNGSuite with Matchers {
     db.createTables()
 
     intercept[IllegalStateException] {
-      SummaryMain.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "-r", "test", "--method", "addSamples", "--samplesConfigFile", configFile.getAbsolutePath))
+      SummaryTool.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "-r", "test", "--method", "addSamples", "--samplesConfigFile", configFile.getAbsolutePath))
     }.getMessage shouldBe "Project 'test' does not exist"
 
     val projectId = Await.result(db.createProject("test"), Duration.Inf)
 
     intercept[IllegalStateException] {
-      SummaryMain.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "-r", "test", "--method", "addSamples", "--samplesConfigFile", configFile.getAbsolutePath))
+      SummaryTool.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "-r", "test", "--method", "addSamples", "--samplesConfigFile", configFile.getAbsolutePath))
     }.getMessage shouldBe "Run 'test' does not exist"
 
     val runId = Await.result(db.createRun("test", projectId, "test", "test", "test", new Date(System.currentTimeMillis())), Duration.Inf)
 
     intercept[IllegalArgumentException] {
-      SummaryMain.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "-r", "test", "--method", "addSamples"))
+      SummaryTool.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "-r", "test", "--method", "addSamples"))
     }.getMessage shouldBe "requirement failed: sample config file required"
 
-    SummaryMain.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "-r", "test", "--method", "addSamples", "--samplesConfigFile", configFile.getAbsolutePath))
+    SummaryTool.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "-r", "test", "--method", "addSamples", "--samplesConfigFile", configFile.getAbsolutePath))
 
     val samples = Await.result(db.getSamples(), Duration.Inf)
     samples.size shouldBe 2
@@ -220,7 +220,7 @@ class MainTest extends TestNGSuite with Matchers {
 
     val projectId = Await.result(db.createProject("test"), Duration.Inf)
 
-    SummaryMain.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "-r", "test", "--method", "addRunAndSamples", "--samplesConfigFile", configFile.getAbsolutePath, "--outputDir", "dir", "--runVersion", "version", "--commitHash", "hash"))
+    SummaryTool.main(Array("-h2", dbFile.getAbsolutePath, "-p", "test", "-r", "test", "--method", "addRunAndSamples", "--samplesConfigFile", configFile.getAbsolutePath, "--outputDir", "dir", "--runVersion", "version", "--commitHash", "hash"))
     val samples = Await.result(db.getSamples(), Duration.Inf)
     samples.size shouldBe 2
     val libraries = Await.result(db.getLibraries(), Duration.Inf)

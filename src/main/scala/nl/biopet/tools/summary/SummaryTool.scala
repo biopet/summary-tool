@@ -12,7 +12,7 @@ import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 
-object Main extends ToolCommand {
+object SummaryTool extends ToolCommand {
   def main(args: Array[String]): Unit = {
     val parser = new ArgsParser(
       this.getClass.getPackage.getName.split(".").last)
