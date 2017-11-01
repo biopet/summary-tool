@@ -15,6 +15,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class SummaryToolTest extends TestNGSuite with Matchers {
 
+  def toolCommand: SummaryTool.type: SummaryTool
   @Test
   def testUnknownMethod(): Unit = {
     val dbFile = File.createTempFile("summary.", ".db")
