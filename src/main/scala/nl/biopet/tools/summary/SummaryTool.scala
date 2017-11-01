@@ -12,13 +12,14 @@ import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 
-object SummaryTool extends ToolCommand {
+object SummaryTool extends ToolCommand[Args] {
+  def emptyArgs: Args = Args()
+  def argsParser = new ArgsParser(toolName)
+
   def main(args: Array[String]): Unit = {
     val parser = new ArgsParser(
       this.getClass.getPackage.getName.split(".").last)
-    val cmdArgs =
-      parser.parse(args, Args()).getOrElse(throw new IllegalArgumentException)
-
+    val cmdArgs = cmdArrayToArgs(args)
     val db = (cmdArgs.h2File, cmdArgs.jdbc) match {
       case (Some(_), Some(_)) =>
         throw new IllegalArgumentException("h2 file and jdbcUrl are given")
